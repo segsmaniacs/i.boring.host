@@ -1,0 +1,10 @@
+﻿{
+  "Name": "jesusismynig.ga",
+  "DestinationType": "ImageUploader",
+  "RequestURL": "https://api.boring.host/api/upload",
+  "FileFormName": "file",
+  "Arguments": {
+    "token": "<your_api_token>"
+  },
+  "URL": "https://jesusismynig.ga/$json:data.code$.$json:data.extension$"
+}

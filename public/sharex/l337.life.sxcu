@@ -1,0 +1,10 @@
+﻿{
+  "Name": "l337.life",
+  "DestinationType": "ImageUploader",
+  "RequestURL": "https://api.boring.host/api/upload",
+  "FileFormName": "file",
+  "Arguments": {
+    "token": "<your_api_token>"
+  },
+  "URL": "https://l337.life/$json:data.code$.$json:data.extension$"
+}
