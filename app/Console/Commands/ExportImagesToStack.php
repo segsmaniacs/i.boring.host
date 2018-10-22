@@ -42,11 +42,13 @@ class ExportImagesToStack extends Command
     {
         $startTime = time();
 
-        $imageCount = DB::select("SELECT count(*) as count FROM images WHERE active = 1")[0];
+//        $imageCount = DB::select("SELECT count(*) as count FROM images WHERE active = 1")[0];
+        $imageCount = DB::select("SELECT count(*) as count FROM images WHERE active = 1 AND id >= 11900")[0];
 
         $pages = ceil($imageCount->count / 50);
 
-        for ($i = 1; $i < $pages+1; $i++)
+//        for ($i = 1; $i < $pages+1; $i++)
+        for ($i = 239; $i < $pages+1; $i++)
         {
             echo "processing badge: " . $i . " of images \n";
             $images = Image::where('active', 1)->skip($i * 50 - 50)->take(50)->get();
