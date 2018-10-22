@@ -48,7 +48,7 @@ class ExportImagesToStack extends Command
         $pages = ceil($imageCount->count / 50);
 
 //        for ($i = 1; $i < $pages+1; $i++)
-        for ($i = 239; $i < $pages+1; $i++)
+        for ($i = 1; $i < $pages+1; $i++)
         {
             echo "processing badge: " . $i . " of images \n";
             $images = Image::where('active', 1)->skip($i * 50 - 50)->take(50)->get();
