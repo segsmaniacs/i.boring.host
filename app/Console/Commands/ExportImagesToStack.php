@@ -51,7 +51,7 @@ class ExportImagesToStack extends Command
         for ($i = 1; $i < $pages+1; $i++)
         {
             echo "processing badge: " . $i . " of images \n";
-            $images = Image::where('active', 1)->skip($i * 50 - 50)->take(50)->get();
+            $images = Image::where('active', 1)->skip(($i * 50 - 50) + 11900)->take(50)->get();
 
             foreach ($images as $image) {
                 $stackLocation = $image->storeImageToWebDav($image, $image->code, $image->extension,
