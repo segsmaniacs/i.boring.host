@@ -155,6 +155,7 @@ class UserInfoController extends Controller
         }
 
         $image->active = false;
+        $image->stack_location = null;
         $image->save();
 
 //        Storage::disk('spaces')->delete(explode(',', $image->image)[0] . '/' . $image->code . '.' . $image->extension);
