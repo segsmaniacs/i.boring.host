@@ -41,17 +41,18 @@ class ExportImagesToStack extends Command
     public function handle()
     {
         $startTime = time();
-
-//        $imageCount = DB::select("SELECT count(*) as count FROM images WHERE active = 1")[0];
-        $imageCount = DB::select("SELECT count(*) as count FROM images WHERE active = 1 AND id > 18870")[0];
-
-        $pages = ceil($imageCount->count / 50);
-
+//
+////        $imageCount = DB::select("SELECT count(*) as count FROM images WHERE active = 1")[0];
+//        $imageCount = DB::select("SELECT count(*) as count FROM images WHERE active = 1 AND id > 18870")[0];
+//
+//        $pages = ceil($imageCount->count / 50);
+//
+////        for ($i = 1; $i < $pages+1; $i++)
 //        for ($i = 1; $i < $pages+1; $i++)
-        for ($i = 1; $i < $pages+1; $i++)
-        {
-            echo "processing badge: " . $i . " of images \n";
-            $images = Image::where('active', 1)->skip(($i * 50 - 50) + 18870)->take(50)->get();
+//        {
+//            echo "processing badge: " . $i . " of images \n";
+//            $images = Image::where('active', 1)->skip(($i * 50 - 50) + 18870)->take(50)->get();
+            $images = Image::where('active', 1)->where('id', '>=', 18871)->where('id', '<=', 19776)->get();
 
             foreach ($images as $image) {
                 $stackLocation = $image->storeImageToWebDav($image, $image->code, $image->extension,
@@ -62,7 +63,7 @@ class ExportImagesToStack extends Command
 
 //                $this->line('uploaded ' . $image->id . ' to the stack');
             }
-        }
+//        }
 
         $took = time() - $startTime;
         echo "Done exporting images, took: " . $took . " seconds \n";
