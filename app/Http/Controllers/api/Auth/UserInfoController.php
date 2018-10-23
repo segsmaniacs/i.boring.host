@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\api\Auth;
 
 use App\Helpers\SeaweedStorage;
+use App\Helpers\WebDav;
 use App\Http\Controllers\Controller;
 use App\Models\Image;
 use Illuminate\Http\Request;
@@ -161,6 +162,8 @@ class UserInfoController extends Controller
         $seaweedStorage = new SeaweedStorage();
         $seaweedStorage->delete($image->image);
         $seaweedStorage->delete($image->thumbnail);
+
+        (new WebDav())->deleteFile($image->stack_location);
 
         return response()->json([
            'status' => 'success',
