@@ -53,7 +53,6 @@ class HandleImageController extends Controller
 
     public function test()
     {
-        (new WebDav())->deleteFile('boring.host/2018/4/dog.jpg');
         return view('upload_form');
     }
 }

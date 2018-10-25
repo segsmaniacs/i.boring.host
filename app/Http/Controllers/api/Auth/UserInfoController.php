@@ -158,7 +158,7 @@ class UserInfoController extends Controller
 
         (new WebDav())->deleteFile($image->stack_location);
         $image->stack_location = null;
-        
+
         $image->save();
 
 //        Storage::disk('spaces')->delete(explode(',', $image->image)[0] . '/' . $image->code . '.' . $image->extension);
