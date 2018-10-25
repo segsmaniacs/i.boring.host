@@ -155,7 +155,10 @@ class UserInfoController extends Controller
         }
 
         $image->active = false;
+
+        (new WebDav())->deleteFile($image->stack_location);
         $image->stack_location = null;
+        
         $image->save();
 
 //        Storage::disk('spaces')->delete(explode(',', $image->image)[0] . '/' . $image->code . '.' . $image->extension);
@@ -163,8 +166,6 @@ class UserInfoController extends Controller
         $seaweedStorage = new SeaweedStorage();
         $seaweedStorage->delete($image->image);
         $seaweedStorage->delete($image->thumbnail);
-
-        (new WebDav())->deleteFile($image->stack_location);
 
         return response()->json([
            'status' => 'success',
