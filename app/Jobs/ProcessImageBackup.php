@@ -33,12 +33,17 @@ class ProcessImageBackup implements ShouldQueue
      */
     public function handle()
     {
+        if (!$this->image->active) {
+            return;
+        }
+
         $stackLocation = $this->image->storeImageToWebDav($this->image, $this->image->code, $this->image->extension,
             (new SeaweedStorage())->getImageContents($this->image)
         );
 
         $this->image->stack_location = $stackLocation;
         $this->image->save();
+
         return;
     }
 
