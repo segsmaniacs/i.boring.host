@@ -23,7 +23,7 @@ class ProcessImageBackup implements ShouldQueue
      */
     public function __construct(Image $image)
     {
-        $this->image = $image;
+        $this->image = Image::wher('id', $image->id)->first();
     }
 
     /**
@@ -33,7 +33,7 @@ class ProcessImageBackup implements ShouldQueue
      */
     public function handle()
     {
-        if (!$this->image->active) {
+        if (!$this->image || !$this->image->active) {
             return;
         }
 
