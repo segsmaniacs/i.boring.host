@@ -41,8 +41,9 @@ class ProcessImageBackup implements ShouldQueue
             (new SeaweedStorage())->getImageContents($this->image)
         );
 
-        $this->image->stack_location = $stackLocation;
-        $this->image->save();
+        $file = $this->image->file;
+        $file->stack_location = $stackLocation;
+        $file->save();
 
         return;
     }

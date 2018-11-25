@@ -96,6 +96,10 @@ class mediaUploadController extends Controller
                 'location' => $disImage['assign']->fid,
                 'thumbnail_location' => $disThumbnail['assign']->fid
             ]);
+
+            if (env('APP_ENV') == 'production') {
+                $this->dispatch(new ProcessImageBackup($image));
+            }
         }
 
         $image = $image->create([
@@ -108,10 +112,6 @@ class mediaUploadController extends Controller
             'user_agent' => substr($request->header('User-Agent'), 0, 190),
             'file_id' => $file->id
         ]);
-
-        if (env('APP_ENV') == 'production') {
-            $this->dispatch(new ProcessImageBackup($image));
-        }
 
         Storage::disk('images')->delete($image->code . '.' . $image->extension);
         Storage::disk('thumbnails')->delete($image->code . '.png');
