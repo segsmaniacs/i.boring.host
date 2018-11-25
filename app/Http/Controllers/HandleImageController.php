@@ -13,7 +13,7 @@ class HandleImageController extends Controller
 {
     public function getinfo($code, Request $request, Image $image)
     {
-        $image = $image->select('id', 'code', 'filename', 'extension', 'size', 'user_id')->where('code', $code)->where('active', 1)->first();
+        $image = $image->select('id', 'code', 'filename', 'extension', 'user_id')->where('code', $code)->where('active', 1)->first();
 
         if (!$image) {
             return response()->json([
@@ -41,7 +41,6 @@ class HandleImageController extends Controller
                 'code' => $image->code,
                 'filename' => $image->filename,
                 'extension' => $image->extension,
-                'size' => $image->size,
                 'views' => $viewCount,
                 'user_id' => $image->user_id,
                 'url' => env('APP_HOME') . '/' . $image->code,
