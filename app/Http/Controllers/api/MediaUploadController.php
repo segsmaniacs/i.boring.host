@@ -88,7 +88,7 @@ class mediaUploadController extends Controller
         if (!$file) {
             // store image
             $disImage = $image->storeImage('../storage/images/' . $code . '.' . $ext);
-            $disThumbnail = $image->storeImage('../storage/images/thumbnail/' . $code . '.png ');
+            $disThumbnail = $image->storeImage('../storage/images/thumbnail/' . $code . '.png');
 
             $file = FileModel::create([
                 'sha1_hash' => $sha1Hash,
