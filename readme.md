@@ -18,3 +18,11 @@ The `i.domain.com` should be pointed to `/storage/images` folder of the Laravel 
 coming soon...
 
 but for now send post requests to `api.domain.com/api/upload` with a file param containing the image
+
+upgrade procedure:
+1. php artisan down
+2. git pull
+3. php artisan migrate
+4. php artisan:migrate_files
+5. set up the new cdn
+6. php artisan up

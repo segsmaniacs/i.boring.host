@@ -27,7 +27,9 @@ class Image extends Model
         'active',
         'user_id',
         'user_agent',
-        'thumbnail'
+        'thumbnail',
+        'file_id',
+        'stack_location'
     ];
 
     public function getCode()
@@ -52,6 +54,15 @@ class Image extends Model
             return $math->toBase(0 + 1000000 + 1);
         }
         return $math->toBase($last->id + 1000000 + 1);
+    }
+
+    /**
+     * Get the file
+     * @return \Illuminate\Database\Eloquent\Relations\HasOne
+     */
+    public function file()
+    {
+        return $this->hasOne(File::class, 'id', 'file_id');
     }
 
 

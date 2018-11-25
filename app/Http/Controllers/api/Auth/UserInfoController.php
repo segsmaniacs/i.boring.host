@@ -7,7 +7,6 @@ use App\Helpers\WebDav;
 use App\Http\Controllers\Controller;
 use App\Models\Image;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
 use Validator;
 use Hash;
 
@@ -136,7 +135,7 @@ class UserInfoController extends Controller
         $code = $request->input('code');
         $user = $request->user();
 
-        $image = $image->where('code', $code)->first();
+        $image = $image->where('code', $code)->where('active', 1)->first();
         if (!$image) {
             return response()->json([
                'status' => 'error',
@@ -154,18 +153,26 @@ class UserInfoController extends Controller
             ]);
         }
 
+        $file = $image->file;
+        $file_id = $image->file_id;
+
         $image->active = false;
-
-        (new WebDav())->deleteFile($image->stack_location);
-        $image->stack_location = null;
-
+        $image->file_id = null;
         $image->save();
 
-//        Storage::disk('spaces')->delete(explode(',', $image->image)[0] . '/' . $image->code . '.' . $image->extension);
+        $count = Image::where('file_id', $file_id)->where('active', 1)->count();
 
-        $seaweedStorage = new SeaweedStorage();
-        $seaweedStorage->delete($image->image);
-        $seaweedStorage->delete($image->thumbnail);
+        if ($count < 1) {
+            if (env('APP_ENV') == 'production') {
+                (new WebDav())->deleteFile($file->stack_location);
+            }
+
+            $seaweedStorage = new SeaweedStorage();
+            $seaweedStorage->delete($file->location);
+            $seaweedStorage->delete($file->thumbnail_location);
+
+            $file->delete();
+        }
 
         return response()->json([
            'status' => 'success',

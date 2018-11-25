@@ -4,7 +4,7 @@ use Illuminate\Support\Facades\Schema;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
-class AddImageLocationToImages extends Migration
+class AddFileIdToImagesTable extends Migration
 {
     /**
      * Run the migrations.
@@ -13,10 +13,10 @@ class AddImageLocationToImages extends Migration
      */
     public function up()
     {
-        Schema::table('images', function(Blueprint $table) {
+        Schema::table('images', function (Blueprint $table) {
+            $table->unsignedInteger('file_id')->nullable();
 
-            $table->string('image_path');
-
+            $table->foreign('file_id')->references('id')->on('files')->onDelete('set NULL');
         });
     }
 
@@ -27,10 +27,8 @@ class AddImageLocationToImages extends Migration
      */
     public function down()
     {
-        Schema::table('images', function(Blueprint $table) {
-
-            $table->dropColumn('image_path');
-
+        Schema::table('images', function (Blueprint $table) {
+            $table->dropColumn('file_id');
         });
     }
 }

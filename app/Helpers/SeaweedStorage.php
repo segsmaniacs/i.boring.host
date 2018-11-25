@@ -72,7 +72,7 @@ class SeaweedStorage
         try {
             $res = $this->client->request('DELETE', $volumeUrl . '/' . $fileId);
         } catch (GuzzleException $e) {
-            dd($e);
+            return $e;
         }
 
         if (!$res->getStatusCode() === 200 && !$res->getStatusCode() === 202) {
@@ -87,7 +87,7 @@ class SeaweedStorage
         try {
             $res = $this->client->request('GET', env('SEAWEED_MOTHER') . '/dir/lookup?volumeId=' . $volumeId);
         } catch (GuzzleException $e) {
-            dd($e);
+            return $e;
         }
 
         if ($res->getStatusCode() !== 200) {

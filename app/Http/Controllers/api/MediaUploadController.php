@@ -6,21 +6,22 @@ use App\Http\Controllers\Controller;
 use App\Jobs\ProcessImageBackup;
 use App\Models\User;
 use Illuminate\Http\Request;
-use App\Models\Image as ImageModel;
+use App\Models\Image;
 use Illuminate\Support\Facades\Storage;
 use File;
-use Image;
+use App\Models\File as FileModel;
+use Intervention\Image\Facades\Image as InterventionImage;
 
 class mediaUploadController extends Controller
 {
-    public function upload(Request $request, ImageModel $image, User $user)
+    public function upload(Request $request, Image $image, User $user)
     {
         $file = $request->file('file');
         if (!$file) {
             return response()->json([
-                'status' => "error",
+                'success' => false,
                 'message' => "No file specified"
-            ]);
+            ], 422);
         }
 
         $ext = strtolower($file->getClientOriginalExtension());
@@ -51,8 +52,6 @@ class mediaUploadController extends Controller
             $imagick->stripImage();
             $imagick = $imagick->getImagesBlob();
 
-            $thumb = Image::make($path)->fit(180, 180);
-
             unlink('../temp_img/' . $tmp_name . '.gif');
         } else {
             $content = File::get($file);
@@ -62,9 +61,9 @@ class mediaUploadController extends Controller
             $imagick = new \Imagick();
             $imagick->readImageBlob($content);
             $imagick->stripImage();
-
-            $thumb = Image::make($path)->fit(180, 180);
         }
+
+        $thumb = InterventionImage::make($path)->fit(180, 180);
 
         // Image parsing done, checking if there's a user;
         $uid = null;
@@ -77,30 +76,45 @@ class mediaUploadController extends Controller
 
         $code = $image->getCode() . str_random(4);
 
-        $thumb->save('../storage/images/thumbnail/' . $code . '.jpg');
+        $thumb->save('../storage/images/thumbnail/' . $code . '.png');
 
         Storage::disk('images')->put($code . '.' . $ext, $imagick);
 
-        $disImage = $image->storeImage('../storage/images/' . $code . '.' . $ext);
-        $disThumbnail = $image->storeImage('../storage/images/thumbnail/' . $code . '.jpg');
+        // get sha1 hash to check if image already exists
+        $sha1Hash = sha1_file('../storage/images/' . $code . '.' . $ext);
+
+        // check if image exists, if not store the image
+        $file = FileModel::where('sha1_hash', $sha1Hash)->where('size', $size)->first();
+        if (!$file) {
+            // store image
+            $disImage = $image->storeImage('../storage/images/' . $code . '.' . $ext);
+            $disThumbnail = $image->storeImage('../storage/images/thumbnail/' . $code . '.png ');
+
+            $file = FileModel::create([
+                'sha1_hash' => $sha1Hash,
+                'size' => $size,
+                'location' => $disImage['assign']->fid,
+                'thumbnail_location' => $disThumbnail['assign']->fid
+            ]);
+        }
 
         $image = $image->create([
             'code' => $code,
             'filename' => htmlspecialchars($name . '.' . $ext),
             'extension' => $ext,
-            'image' => $disImage['assign']->fid,
-            'size' => $size,
             'ip' => $this->getIp(),
             'active' => true,
             'user_id' => $uid,
             'user_agent' => substr($request->header('User-Agent'), 0, 190),
-            'thumbnail' => $disThumbnail['assign']->fid
+            'file_id' => $file->id
         ]);
 
-        $this->dispatch(new ProcessImageBackup($image));
+        if (env('APP_ENV') == 'production') {
+            $this->dispatch(new ProcessImageBackup($image));
+        }
 
         Storage::disk('images')->delete($image->code . '.' . $image->extension);
-        Storage::disk('thumbnails')->delete($image->code . '.jpg');
+        Storage::disk('thumbnails')->delete($image->code . '.png');
 
         return response()->json([
             'status' => 'success',
