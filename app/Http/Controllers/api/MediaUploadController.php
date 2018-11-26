@@ -65,9 +65,12 @@ class mediaUploadController extends Controller
                 $file->move('../temp_img/', $tmp_name . '.gif');
                 $path = '../temp_img/' . $tmp_name . '.gif';
 
-                $imagick = new \Imagick('../temp_img/' . $tmp_name . '.gif');
+//                $imagick = new \Imagick('../temp_img/' . $tmp_name . '.gif');
+                $imagick = new \Imagick(base_path() . '/temp_img/' . $tmp_name . '.gif');
                 $imagick->stripImage();
                 $imagick = $imagick->getImagesBlob();
+
+                $thumb = InterventionImage::make($path)->fit(180, 180);
 
                 unlink('../temp_img/' . $tmp_name . '.gif');
             } else {
@@ -78,10 +81,9 @@ class mediaUploadController extends Controller
                 $imagick = new \Imagick();
                 $imagick->readImageBlob($content);
                 $imagick->stripImage();
+
+                $thumb = InterventionImage::make($path)->fit(180, 180);
             }
-
-            $thumb = InterventionImage::make($path)->fit(180, 180);
-
             $thumb->save('../storage/images/thumbnail/' . $code . '.png');
 
             Storage::disk('images')->put($code . '.' . $ext, $imagick);
