@@ -37,11 +37,15 @@ class ProcessImageBackup implements ShouldQueue
             return;
         }
 
-        $stackLocation = $this->image->storeImageToWebDav($this->image, $this->image->code, $this->image->extension,
+        $file = $this->image->file;
+
+//        $stackLocation = $this->image->storeImageToWebDav($this->image, $this->image->code, $this->image->extension,
+//            (new SeaweedStorage())->getImageContents($this->image)
+//        );
+        $stackLocation = $file->storeImageToWebDav($file, $this->image->extension,
             (new SeaweedStorage())->getImageContents($this->image)
         );
 
-        $file = $this->image->file;
         $file->stack_location = $stackLocation;
         $file->save();
 
