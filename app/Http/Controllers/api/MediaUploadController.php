@@ -42,29 +42,7 @@ class mediaUploadController extends Controller
             return response('File is too big (exceeds 6mb limit)', 403);
         }
 
-        // Process image through imagick to remove metadata
-        if ($ext == 'gif') {
-            $tmp_name = str_random(20);
-            $file->move('../temp_img/', $tmp_name . '.gif');
-            $path = '../temp_img/' . $tmp_name . '.gif';
-
-            $imagick = new \Imagick('../temp_img/' . $tmp_name . '.gif');
-            $imagick->stripImage();
-            $imagick = $imagick->getImagesBlob();
-
-            unlink('../temp_img/' . $tmp_name . '.gif');
-        } else {
-            $content = File::get($file);
-
-            $path = $file->getRealPath();
-
-            $imagick = new \Imagick();
-            $imagick->readImageBlob($content);
-            $imagick->stripImage();
-        }
-
-        $thumb = InterventionImage::make($path)->fit(180, 180);
-
+        $code = $image->getCode() . str_random(4);
         // Image parsing done, checking if there's a user;
         $uid = null;
         if ($request->input('token')) {
@@ -74,23 +52,45 @@ class mediaUploadController extends Controller
             }
         }
 
-        $code = $image->getCode() . str_random(4);
-
-        $thumb->save('../storage/images/thumbnail/' . $code . '.png');
-
-        Storage::disk('images')->put($code . '.' . $ext, $imagick);
-
         // get sha1 hash to check if image already exists
-        $sha1Hash = sha1_file('../storage/images/' . $code . '.' . $ext);
+        $sha1Hash = sha1_file($file->getRealPath());
+
+        $fileRecord = FileModel::where('sha1_hash', $sha1Hash)->where('size', $size)->first();
+        if (!$fileRecord) {
+            // Process image through imagick to remove metadata
+            if ($ext == 'gif') {
+                $tmp_name = str_random(20);
+                $file->move('../temp_img/', $tmp_name . '.gif');
+                $path = '../temp_img/' . $tmp_name . '.gif';
+
+                $imagick = new \Imagick('../temp_img/' . $tmp_name . '.gif');
+                $imagick->stripImage();
+                $imagick = $imagick->getImagesBlob();
+
+                unlink('../temp_img/' . $tmp_name . '.gif');
+            } else {
+                $content = File::get($file);
+
+                $path = $file->getRealPath();
+
+                $imagick = new \Imagick();
+                $imagick->readImageBlob($content);
+                $imagick->stripImage();
+            }
+
+            $thumb = InterventionImage::make($path)->fit(180, 180);
+
+            $thumb->save('../storage/images/thumbnail/' . $code . '.png');
+
+            Storage::disk('images')->put($code . '.' . $ext, $imagick);
 
         // check if image exists, if not store the image
-        $file = FileModel::where('sha1_hash', $sha1Hash)->where('size', $size)->first();
-        if (!$file) {
+//        $file = FileModel::where('sha1_hash', $sha1Hash)->where('size', $size)->first();
             // store image
             $disImage = $image->storeImage('../storage/images/' . $code . '.' . $ext);
             $disThumbnail = $image->storeImage('../storage/images/thumbnail/' . $code . '.png');
 
-            $file = FileModel::create([
+            $fileRecord = FileModel::create([
                 'sha1_hash' => $sha1Hash,
                 'size' => $size,
                 'location' => $disImage['assign']->fid,
@@ -110,7 +110,7 @@ class mediaUploadController extends Controller
             'active' => true,
             'user_id' => $uid,
             'user_agent' => substr($request->header('User-Agent'), 0, 190),
-            'file_id' => $file->id
+            'file_id' => $fileRecord->id
         ]);
 
         Storage::disk('images')->delete($image->code . '.' . $image->extension);
