@@ -53,10 +53,12 @@ class mediaUploadController extends Controller
         }
 
         // get sha1 hash to check if image already exists
+        $newImage = false;
         $sha1Hash = sha1_file($file->getRealPath());
 
         $fileRecord = FileModel::where('sha1_hash', $sha1Hash)->where('size', $size)->first();
         if (!$fileRecord) {
+            $newImage = true;
             // Process image through imagick to remove metadata
             if ($ext == 'gif') {
                 $tmp_name = str_random(20);
@@ -96,10 +98,6 @@ class mediaUploadController extends Controller
                 'location' => $disImage['assign']->fid,
                 'thumbnail_location' => $disThumbnail['assign']->fid
             ]);
-
-            if (env('APP_ENV') == 'production') {
-                $this->dispatch(new ProcessImageBackup($image));
-            }
         }
 
         $image = $image->create([
@@ -112,6 +110,10 @@ class mediaUploadController extends Controller
             'user_agent' => substr($request->header('User-Agent'), 0, 190),
             'file_id' => $fileRecord->id
         ]);
+
+        if ($newImage && env('APP_ENV') == 'production') {
+            $this->dispatch(new ProcessImageBackup($image));
+        }
 
         Storage::disk('images')->delete($image->code . '.' . $image->extension);
         Storage::disk('thumbnails')->delete($image->code . '.png');
