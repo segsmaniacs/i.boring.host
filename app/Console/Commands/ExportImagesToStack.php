@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Helpers\SeaweedStorage;
+use App\Models\File;
 use App\Models\Image;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
@@ -52,18 +53,28 @@ class ExportImagesToStack extends Command
 //        {
 //            echo "processing badge: " . $i . " of images \n";
 //            $images = Image::where('active', 1)->skip(($i * 50 - 50) + 18870)->take(50)->get();
-            $images = Image::where('active', 1)->where('id', '>=', 18871)->where('id', '<=', 19776)->get();
-
-            foreach ($images as $image) {
-                $stackLocation = $image->storeImageToWebDav($image, $image->code, $image->extension,
-                    (new SeaweedStorage())->getImageContents($image)
-                );
-                $image->stack_location = $stackLocation;
-                $image->save();
-
-//                $this->line('uploaded ' . $image->id . ' to the stack');
-            }
+//            $images = Image::where('active', 1)->where('id', '>=', 18871)->where('id', '<=', 19776)->get();
+//
+//            foreach ($images as $image) {
+//                $stackLocation = $image->storeImageToWebDav($image, $image->code, $image->extension,
+//                    (new SeaweedStorage())->getImageContents($image)
+//                );
+//                $image->stack_location = $stackLocation;
+//                $image->save();
+//
+////                $this->line('uploaded ' . $image->id . ' to the stack');
+//            }
 //        }
+
+        $files = File::orWhere('stack_location', '')->orWhere('stack_location', null)->get();
+        foreach ($files as $file) {
+            $stackLocation = $file->storeFileToWebDav($file, $file->images->first()->extension,
+                (new SeaweedStorage())->getImageContents($file->location)
+            );
+
+            $file->stack_location = $stackLocation;
+            $file->save();
+        }
 
         $took = time() - $startTime;
         echo "Done exporting images, took: " . $took . " seconds \n";

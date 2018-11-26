@@ -18,6 +18,11 @@ class File extends Model
         'stack_location'
     ];
 
+    public function images()
+    {
+        return $this->hasMany(Image::class, 'file_id', 'id');
+    }
+
     public function storeFileToWebDav($file, $ext, $content)
     {
         $last = $file ? $file : $file->orderBy('id', 'DESC')->first();
