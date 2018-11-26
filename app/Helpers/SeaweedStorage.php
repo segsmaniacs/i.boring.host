@@ -99,9 +99,9 @@ class SeaweedStorage
         return $res->locations[0]->url;
     }
 
-    public function getImageContents($image)
+    public function getImageContents($location)
     {
-        $volumeID = explode(',', $image->image)[0];
+        $volumeID = explode(',', $location)[0];
 
         try {
             $volume = $this->client->request('GET', env('SEAWEED_MOTHER') . "/dir/lookup?volumeId=" . $volumeID);
@@ -119,6 +119,6 @@ class SeaweedStorage
 //
 //        return $contents->getBody();
 
-        return file_get_contents('http://' . $locationURL . '/' . $image->image);
+        return file_get_contents('http://' . $locationURL . '/' . $location);
     }
 }
